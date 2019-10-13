@@ -1,6 +1,8 @@
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import transaction.AbstractTransaction;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ProcessTest {
 
@@ -12,10 +14,10 @@ class ProcessTest {
         process.addTransaction(new TestTransactionAddOne(), "TestTransactionAddOne");
 
         process.doProcess();
-        Assertions.assertEquals("1", testObjectStringContent.getContent());
+        assertEquals("1", testObjectStringContent.getContent());
 
         process.doProcess();
-        Assertions.assertEquals("1", testObjectStringContent.getContent());
+        assertEquals("1", testObjectStringContent.getContent());
     }
 
     @Test
@@ -27,7 +29,7 @@ class ProcessTest {
         process.addTransaction(new TestTransactionAddTwo(), "TestTransactionAddTwo");
 
         process.doProcess();
-        Assertions.assertEquals("12", testObjectStringContent.getContent());
+        assertEquals("12", testObjectStringContent.getContent());
     }
 
     @Test
@@ -40,8 +42,8 @@ class ProcessTest {
         process.addTransaction(new TestTransactionAddTwo(), "TestTransactionAddTwo");
 
         process.doProcess();
-        Assertions.assertEquals("1", testObjectStringContent.getContent());
-        Assertions.assertTrue(process.hasErrors());
+        assertEquals("1", testObjectStringContent.getContent());
+        assertTrue(process.hasErrors());
     }
 
     @Test
@@ -54,8 +56,27 @@ class ProcessTest {
         process.addTransaction(new TestTransactionAddTwo(), "TestTransactionAddTwo");
 
         process.doProcess();
-        Assertions.assertEquals("12", testObjectStringContent.getContent());
-        Assertions.assertTrue(process.hasErrors());
+        assertEquals("12", testObjectStringContent.getContent());
+        assertTrue(process.hasErrors());
+    }
+
+    @Test
+    public void errorHandling() {
+        TestObjectStringContent testObjectStringContent = new TestObjectStringContent();
+        Process<TestObjectStringContent> process = new Process<>(testObjectStringContent);
+
+        process.addTransaction(new TestTransactionAddOne(), "TestTransactionAddOne");
+        process.addTransaction(new TestTransactionWithError(), "TestTransactionWithError")
+                .addErrorHandler((e, object) -> {
+                    if (e instanceof RuntimeException && object.getContent().equals("1")) {
+                        object.setContent(object.getContent() + "-handledError");
+                    }
+                    throw new Exception();
+                });
+
+        process.doProcess();
+        assertEquals("1-handledError", testObjectStringContent.getContent());
+
     }
 
     class TestTransactionAddOne implements AbstractTransaction<TestObjectStringContent> {

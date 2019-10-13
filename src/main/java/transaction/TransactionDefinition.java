@@ -46,4 +46,17 @@ public class TransactionDefinition<T> {
         return transactionId;
     }
 
+    public List<TransactionErrorHandler<T>> getHandlers() {
+        return handlers;
+    }
+
+    public TransactionDefinition<T> setHandlers(List<TransactionErrorHandler<T>> handlers) {
+        this.handlers = handlers;
+        return this;
+    }
+
+    public TransactionDefinition<T> addErrorHandler(TransactionErrorHandler<T> ha) {
+        handlers.add(ha);
+        return this;
+    }
 }

@@ -1,7 +1,5 @@
-import transaction.AbstractTransaction;
-import transaction.TransactionDefinition;
-import transaction.TransactionRepository;
-import transaction.TransactionStatus;
+import org.apache.commons.collections4.CollectionUtils;
+import transaction.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +7,7 @@ import java.util.List;
 public class Process<T> {
 
     private String processId;
-    private final T processedObject;
+    private T processedObject;
     private boolean hasErrors = false;
     private TransactionRepository<T> transactionRepository;
     private List<TransactionDefinition<T>> transactions = new ArrayList<>();
@@ -28,9 +26,22 @@ public class Process<T> {
         for (TransactionDefinition<T> transaction : transactions) {
             if (TransactionStatus.NOT_STARTED.equals(transaction.getStatus())) {
                 try {
-                    transaction.getTransaction().process(processedObject);
+                    processedObject = transaction.getTransaction().process(processedObject);
                     transaction.setStatus(TransactionStatus.FINISHED);
+                    transactionRepository.changeStatus(transaction);
                 } catch (Exception e) {
+                    handleException(transaction, e);
+                }
+            }
+        }
+    }
+
+    private void handleException(TransactionDefinition<T> transaction, Exception e) {
+        if (CollectionUtils.isNotEmpty(transaction.getHandlers())) {
+            for (TransactionErrorHandler<T> h : transaction.getHandlers()) {
+                try {
+                    h.handle(e, processedObject);
+                } catch (Exception ex) {
                     hasErrors = true;
                     transaction.setStatus(TransactionStatus.ERROR);
                     if (!transaction.isContinueOnError()) {
