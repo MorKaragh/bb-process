@@ -40,9 +40,18 @@ public class Process<T> {
                     processedObject = transaction.getTransaction().process(processedObject);
                     transaction.setStatus(TransactionStatus.FINISHED);
                     if (transactionRepository != null) {
+                        log.info("Transaction changing status {processId=" + processId +
+                                ", transactionId=" + transaction.getTransactionId() +
+                                ", status=" + transaction.getStatus().toString() + "}");
+
                         transactionRepository.changeStatus(transaction);
                     }
                 } catch (Exception e) {
+
+                    log.error("Transaction error {processId=" + processId +
+                            ", transactionId=" + transaction.getTransactionId() +
+                            ", status=" + transaction.getStatus().toString() + "}", e);
+
                     if (CollectionUtils.isNotEmpty(transaction.getHandlers())) {
                         for (TransactionErrorHandler<T> h : transaction.getHandlers()) {
                             try {
