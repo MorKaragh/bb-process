@@ -1,3 +1,4 @@
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import transaction.AbstractTransaction;
 
@@ -5,6 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ProcessTest {
+
+    @BeforeAll
+    public static void setUp() {
+        System.setProperty("org.slf4j.simpleLogger.logFile", "System.out");
+    }
 
     @Test
     public void transactionsDoNotRepeat() {

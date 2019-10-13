@@ -28,7 +28,13 @@ public class Process<T> {
     }
 
     public void doProcess() {
+        log.info("Starting process {processId=" + processId + "}");
         for (TransactionDefinition<T> transaction : transactions) {
+
+            log.info("Transaction status {processId=" + processId +
+                    ", transactionId=" + transaction.getTransactionId() +
+                    ", status=" + transaction.getStatus().toString() + "}");
+
             if (TransactionStatus.NOT_STARTED.equals(transaction.getStatus())) {
                 try {
                     processedObject = transaction.getTransaction().process(processedObject);
