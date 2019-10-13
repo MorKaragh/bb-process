@@ -9,7 +9,7 @@ class ProcessTest {
     @Test
     public void transactionsDoNotRepeat() {
         TestObjectStringContent testObjectStringContent = new TestObjectStringContent();
-        Process<TestObjectStringContent> process = new Process<>(testObjectStringContent);
+        Process<TestObjectStringContent> process = new Process<>(testObjectStringContent, "processId");
 
         process.addTransaction(new TestTransactionAddOne(), "TestTransactionAddOne");
 
@@ -23,7 +23,7 @@ class ProcessTest {
     @Test
     public void transactionsEnrichesPreviousResult() {
         TestObjectStringContent testObjectStringContent = new TestObjectStringContent();
-        Process<TestObjectStringContent> process = new Process<>(testObjectStringContent);
+        Process<TestObjectStringContent> process = new Process<>(testObjectStringContent, "processId");
 
         process.addTransaction(new TestTransactionAddOne(), "TestTransactionAddOne");
         process.addTransaction(new TestTransactionAddTwo(), "TestTransactionAddTwo");
@@ -35,7 +35,7 @@ class ProcessTest {
     @Test
     public void transactionWithError() {
         TestObjectStringContent testObjectStringContent = new TestObjectStringContent();
-        Process<TestObjectStringContent> process = new Process<>(testObjectStringContent);
+        Process<TestObjectStringContent> process = new Process<>(testObjectStringContent, "processId");
 
         process.addTransaction(new TestTransactionAddOne(), "TestTransactionAddOne");
         process.addTransaction(new TestTransactionWithError(), "TestTransactionWithError");
@@ -49,7 +49,7 @@ class ProcessTest {
     @Test
     public void transactionWithNonStoppingError() {
         TestObjectStringContent testObjectStringContent = new TestObjectStringContent();
-        Process<TestObjectStringContent> process = new Process<>(testObjectStringContent);
+        Process<TestObjectStringContent> process = new Process<>(testObjectStringContent, "processId");
 
         process.addTransaction(new TestTransactionAddOne(), "TestTransactionAddOne");
         process.addTransaction(new TestTransactionWithError(), "TestTransactionWithError").continueOnError();
@@ -63,7 +63,7 @@ class ProcessTest {
     @Test
     public void errorHandling() {
         TestObjectStringContent testObjectStringContent = new TestObjectStringContent();
-        Process<TestObjectStringContent> process = new Process<>(testObjectStringContent);
+        Process<TestObjectStringContent> process = new Process<>(testObjectStringContent, "processId");
 
         process.addTransaction(new TestTransactionAddOne(), "TestTransactionAddOne");
         process.addTransaction(new TestTransactionWithError(), "TestTransactionWithError")
@@ -76,7 +76,6 @@ class ProcessTest {
 
         process.doProcess();
         assertEquals("1-handledError", testObjectStringContent.getContent());
-
     }
 
     class TestTransactionAddOne implements AbstractTransaction<TestObjectStringContent> {
