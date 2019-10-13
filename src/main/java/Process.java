@@ -33,7 +33,9 @@ public class Process<T> {
                 try {
                     processedObject = transaction.getTransaction().process(processedObject);
                     transaction.setStatus(TransactionStatus.FINISHED);
-                    transactionRepository.changeStatus(transaction);
+                    if (transactionRepository != null) {
+                        transactionRepository.changeStatus(transaction);
+                    }
                 } catch (Exception e) {
                     if (CollectionUtils.isNotEmpty(transaction.getHandlers())) {
                         for (TransactionErrorHandler<T> h : transaction.getHandlers()) {
