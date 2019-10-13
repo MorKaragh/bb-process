@@ -1,14 +1,15 @@
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import transaction.AbstractTransaction;
 
-class ProcessDefinitionTest {
+class ProcessTest {
 
     @Test
     public void transactionsDoNotRepeat() {
         TestObjectStringContent testObjectStringContent = new TestObjectStringContent();
-        ProcessDefinition<TestObjectStringContent> process = new ProcessDefinition<>(testObjectStringContent);
+        Process<TestObjectStringContent> process = new Process<>(testObjectStringContent);
 
-        process.addTransaction(new TestTransactionAddOne());
+        process.addTransaction(new TestTransactionAddOne(), "TestTransactionAddOne");
 
         process.doProcess();
         Assertions.assertEquals("1", testObjectStringContent.getContent());
@@ -20,10 +21,10 @@ class ProcessDefinitionTest {
     @Test
     public void transactionsEnrichesPreviousResult() {
         TestObjectStringContent testObjectStringContent = new TestObjectStringContent();
-        ProcessDefinition<TestObjectStringContent> process = new ProcessDefinition<>(testObjectStringContent);
+        Process<TestObjectStringContent> process = new Process<>(testObjectStringContent);
 
-        process.addTransaction(new TestTransactionAddOne());
-        process.addTransaction(new TestTransactionAddTwo());
+        process.addTransaction(new TestTransactionAddOne(), "TestTransactionAddOne");
+        process.addTransaction(new TestTransactionAddTwo(), "TestTransactionAddTwo");
 
         process.doProcess();
         Assertions.assertEquals("12", testObjectStringContent.getContent());
@@ -32,11 +33,11 @@ class ProcessDefinitionTest {
     @Test
     public void transactionWithError() {
         TestObjectStringContent testObjectStringContent = new TestObjectStringContent();
-        ProcessDefinition<TestObjectStringContent> process = new ProcessDefinition<>(testObjectStringContent);
+        Process<TestObjectStringContent> process = new Process<>(testObjectStringContent);
 
-        process.addTransaction(new TestTransactionAddOne());
-        process.addTransaction(new TestTransactionWithError());
-        process.addTransaction(new TestTransactionAddTwo());
+        process.addTransaction(new TestTransactionAddOne(), "TestTransactionAddOne");
+        process.addTransaction(new TestTransactionWithError(), "TestTransactionWithError");
+        process.addTransaction(new TestTransactionAddTwo(), "TestTransactionAddTwo");
 
         process.doProcess();
         Assertions.assertEquals("1", testObjectStringContent.getContent());
@@ -46,18 +47,18 @@ class ProcessDefinitionTest {
     @Test
     public void transactionWithNonStoppingError() {
         TestObjectStringContent testObjectStringContent = new TestObjectStringContent();
-        ProcessDefinition<TestObjectStringContent> process = new ProcessDefinition<>(testObjectStringContent);
+        Process<TestObjectStringContent> process = new Process<>(testObjectStringContent);
 
-        process.addTransaction(new TestTransactionAddOne());
-        process.addTransaction(new TestTransactionWithError()).continueOnError();
-        process.addTransaction(new TestTransactionAddTwo());
+        process.addTransaction(new TestTransactionAddOne(), "TestTransactionAddOne");
+        process.addTransaction(new TestTransactionWithError(), "TestTransactionWithError").continueOnError();
+        process.addTransaction(new TestTransactionAddTwo(), "TestTransactionAddTwo");
 
         process.doProcess();
         Assertions.assertEquals("12", testObjectStringContent.getContent());
         Assertions.assertTrue(process.hasErrors());
     }
 
-    class TestTransactionAddOne extends AbstractTransaction<TestObjectStringContent> {
+    class TestTransactionAddOne implements AbstractTransaction<TestObjectStringContent> {
         @Override
         public TestObjectStringContent process(TestObjectStringContent object) {
             return object.setContent(object.getContent() + "1");
@@ -65,14 +66,14 @@ class ProcessDefinitionTest {
     }
 
 
-    class TestTransactionAddTwo extends AbstractTransaction<TestObjectStringContent> {
+    class TestTransactionAddTwo implements AbstractTransaction<TestObjectStringContent> {
         @Override
         public TestObjectStringContent process(TestObjectStringContent object) {
             return object.setContent(object.getContent() + "2");
         }
     }
 
-    class TestTransactionWithError extends AbstractTransaction<TestObjectStringContent> {
+    class TestTransactionWithError implements AbstractTransaction<TestObjectStringContent> {
         @Override
         public TestObjectStringContent process(TestObjectStringContent object) {
             throw new RuntimeException("exception");
@@ -91,7 +92,6 @@ class ProcessDefinitionTest {
             return this;
         }
     }
-
 
 
 }

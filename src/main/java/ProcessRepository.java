@@ -1,7 +1,6 @@
-public class ProcessRepository<T> {
+public interface ProcessRepository<T> {
 
-    public ProcessDefinition<T> load(T object) {
-        return null;
-    }
+    Process<T> load(T object);
+    Process<T> load(String processId);
 
 }

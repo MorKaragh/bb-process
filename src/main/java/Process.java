@@ -1,20 +1,25 @@
+import transaction.AbstractTransaction;
+import transaction.TransactionDefinition;
+import transaction.TransactionRepository;
+import transaction.TransactionStatus;
+
 import java.util.ArrayList;
 import java.util.List;
 
-public class ProcessDefinition<T> {
+public class Process<T> {
 
-
+    private String processId;
     private final T processedObject;
-
-    private List<TransactionDefinition<T>> transactions = new ArrayList<>();
     private boolean hasErrors = false;
+    private TransactionRepository<T> transactionRepository;
+    private List<TransactionDefinition<T>> transactions = new ArrayList<>();
 
-    public ProcessDefinition(T processedObject) {
+    public Process(T processedObject) {
         this.processedObject = processedObject;
     }
 
-    public TransactionDefinition<T>  addTransaction(AbstractTransaction<T> transaction) {
-        TransactionDefinition<T> definition = new TransactionDefinition<>(transaction);
+    public TransactionDefinition<T>  addTransaction(AbstractTransaction<T> transaction, String transactionId) {
+        TransactionDefinition<T> definition = new TransactionDefinition<>(transaction, transactionId);
         transactions.add(definition);
         return definition;
     }
@@ -38,5 +43,14 @@ public class ProcessDefinition<T> {
 
     public boolean hasErrors() {
         return hasErrors;
+    }
+
+    public String getProcessId() {
+        return processId;
+    }
+
+    public Process<T> setProcessId(String processId) {
+        this.processId = processId;
+        return this;
     }
 }
